@@ -15,6 +15,7 @@ import {
   DownloadStrategy,
   XInstallStrategy,
 } from './strategy';
+import { getAppConfig } from './services/config';
 
 /**
  * H5打开App的SDK核心类
@@ -26,16 +27,18 @@ class H5OpenAppSDK {
   /**
    * 初始化SDK
    */
-  public init(options: SdkInitOptions): void {
+  public async init(options: SdkInitOptions): Promise<void> {
     this.options = options;
     this.initialized = true;
 
     // 如果提供了微信AppId，保存它
-    if (options.wxAppId) {
-      setWxAppId(options.wxAppId);
-    }
+    // if (options.wxAppId) {
+    //   setWxAppId(options.wxAppId);
+    // }
 
     console.log('H5OpenAppSDK initialized with options:', options);
+
+    await this.fetchRemoteConfig();
   }
 
   /**
@@ -187,6 +190,35 @@ class H5OpenAppSDK {
       } else if (this.options?.downloadUrl) {
         this.openDownload();
       }
+    }
+  }
+
+  /**
+   * 从远程获取应用配置
+   */
+  public async fetchRemoteConfig(): Promise<void> {
+    this.checkInitialized();
+
+    if (!this.options?.id) {
+      console.warn('未配置应用ID，无法获取远程配置');
+      return;
+    }
+
+    try {
+      const config = await getAppConfig(this.options.id);
+
+      // 更新当前选项
+      this.options = {
+        ...this.options,
+        wxAppId: config.wechatAppId,
+        universalLink: config.appStoreUrl,
+        scheme: config.schemeUrl || this.options.scheme,
+      };
+
+      console.log('成功获取远程配置:', config);
+    } catch (error) {
+      console.error('获取远程配置失败:', error);
+      throw error;
     }
   }
 

@@ -77,7 +77,7 @@ export interface SdkInterface {
   /**
    * 初始化SDK
    */
-  init: (options: SdkInitOptions) => void;
+  init: (options: SdkInitOptions) => Promise<void>;
 
   /**
    * 判断是否可以使用微信开放标签
@@ -121,4 +121,9 @@ export interface SdkInterface {
    * 获取当前能力信息
    */
   getCapability: () => CapabilityDetection;
+
+  /**
+   * 从远程获取应用配置
+   */
+  fetchRemoteConfig: () => Promise<void>;
 }
