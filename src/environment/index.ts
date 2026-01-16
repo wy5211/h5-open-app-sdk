@@ -51,27 +51,6 @@ export function isMobile(): boolean {
   );
 }
 
-/**
- * 获取环境检测结果
- */
-export function getEnvironment(): {
-  isWeChat: boolean;
-  isWeChatWebview: boolean;
-  isWeChatEnv: boolean;
-  isIOS: boolean;
-  isAndroid: boolean;
-  isMobile: boolean;
-} {
-  return {
-    isWeChat: isWeChat(),
-    isWeChatWebview: isWeChatWebview(),
-    isWeChatEnv: isWeChatEnv(),
-    isIOS: isIOS(),
-    isAndroid: isAndroid(),
-    isMobile: isMobile(),
-  };
-}
-
 export default {
   isWeChat,
   isWeChatWebview,
@@ -79,5 +58,4 @@ export default {
   isIOS,
   isAndroid,
   isMobile,
-  getEnvironment,
 };

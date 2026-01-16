@@ -28,6 +28,18 @@ class RequestError extends Error {
   }
 }
 
+const BASE_URL_TEST = 'https://install.test.xmsharetalk.cn';
+const BASE_URL_PROD = 'https://install.sharexm.com.cn';
+let CURRENT_BASE_URL = BASE_URL_PROD;
+
+export function setBaseUrl(isDebug: boolean = false): void {
+  CURRENT_BASE_URL = isDebug ? BASE_URL_TEST : BASE_URL_PROD;
+}
+
+function getBaseUrl(): string {
+  return CURRENT_BASE_URL;
+}
+
 /**
  * 通用请求函数
  * @param options 请求配置
@@ -43,6 +55,9 @@ export async function request<T = any>(
     headers = {},
     timeout = 10000, // 默认 10 秒超时
   } = options;
+
+  // 构建完整的请求URL
+  const fullUrl = url.startsWith('http') ? url : `${getBaseUrl()}${url}`;
 
   // 构建请求配置
   const config: RequestInit = {
@@ -63,7 +78,7 @@ export async function request<T = any>(
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
   try {
-    const response = await fetch(url, {
+    const response = await fetch(fullUrl, {
       ...config,
       signal: controller.signal,
     });
@@ -133,36 +148,4 @@ export async function post<T = any>(
   options?: Partial<Omit<RequestOptions, 'url' | 'method' | 'data'>>
 ) {
   return request<T>({ url, method: 'POST', data, ...options });
-}
-
-/**
- * PUT 请求快捷方法
- */
-export async function put<T = any>(
-  url: string,
-  data?: any,
-  options?: Partial<Omit<RequestOptions, 'url' | 'method' | 'data'>>
-) {
-  return request<T>({ url, method: 'PUT', data, ...options });
-}
-
-/**
- * DELETE 请求快捷方法
- */
-export async function del<T = any>(
-  url: string,
-  options?: Partial<Omit<RequestOptions, 'url' | 'method'>>
-) {
-  return request<T>({ url, method: 'DELETE', ...options });
-}
-
-/**
- * PATCH 请求快捷方法
- */
-export async function patch<T = any>(
-  url: string,
-  data?: any,
-  options?: Partial<Omit<RequestOptions, 'url' | 'method' | 'data'>>
-) {
-  return request<T>({ url, method: 'PATCH', data, ...options });
 }

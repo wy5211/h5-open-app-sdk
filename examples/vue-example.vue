@@ -1,86 +1,83 @@
 <template>
   <div class="app-open-container">
+    <!-- SDK初始化状态 -->
+    <div v-if="!isInitialized">SDK初始化中...</div>
+
     <!-- 微信开放标签容器 -->
-    <div
-      ref="wxContainer"
-      v-if="showWxOpenButton"
-    ></div>
+    <div v-else-if="showWxOpenButton">
+      <div ref="wxContainer"></div>
+      <p>点击上方按钮打开微信小程序</p>
+    </div>
 
     <!-- 备用按钮 -->
-    <button
-      v-if="!showWxOpenButton"
-      @click="handleOpenApp"
-      class="open-app-btn"
-    >
-      {{ buttonText }}
-    </button>
+    <div v-else>
+      <button
+        @click="handleOpenApp"
+        class="open-app-btn"
+      >
+        {{ buttonText }}
+      </button>
+      <p>点击按钮打开App</p>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
-import H5OpenAppSDK from '../src/index';
+import { ref, onMounted } from 'vue';
+import XMInstallSDK, { isWeChat } from '../src/index';
 
 // 定义组件props
 interface Props {
   appId: string;
-  wxAppId?: string;
-  scheme?: string;
-  universalLink?: string;
-  downloadUrl?: string;
-  extInfo?: Record<string, any>;
+  isDebug?: boolean;
+  buttonText?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  extInfo: () => ({}),
+  isDebug: false,
   buttonText: '打开App',
 });
 
 const wxContainer = ref<HTMLDivElement | null>(null);
 const showWxOpenButton = ref(false);
-const buttonText = computed(() => props.buttonText || '打开App');
+const isInitialized = ref(false);
 
 // 初始化SDK
-const initSdk = () => {
-  H5OpenAppSDK.init({
-    id: props.appId,
-    wxAppId: props.wxAppId,
-    scheme: props.scheme,
-    universalLink: props.universalLink,
-    downloadUrl: props.downloadUrl,
-    extInfo: props.extInfo,
-  });
+const initSdk = async () => {
+  try {
+    await XMInstallSDK.init({
+      id: props.appId,
+      isDebug: props.isDebug,
+    });
+    isInitialized.value = true;
+    console.log('SDK初始化成功');
+  } catch (error) {
+    console.error('SDK初始化失败:', error);
+  }
 };
 
 // 处理打开App
 const handleOpenApp = () => {
-  if (H5OpenAppSDK.getEnvironment().isWeChat) {
-    // 在微信中，尝试使用微信开放标签
-    H5OpenAppSDK.openApp();
-  } else {
-    // 在非微信环境中，使用scheme或universal link
-    if (props.universalLink) {
-      H5OpenAppSDK.openByUniversalLink();
-    } else if (props.scheme) {
-      H5OpenAppSDK.openByScheme();
-    } else if (props.downloadUrl) {
-      H5OpenAppSDK.openDownload();
-    }
+  try {
+    XMInstallSDK.openApp();
+  } catch (error) {
+    console.error('打开App失败:', error);
   }
 };
 
 // 检查是否可以使用微信开放标签
 const checkWxOpenCapability = async () => {
+  if (!isInitialized.value) return;
+
   try {
-    const canUse = await H5OpenAppSDK.canUseWxOpen();
+    const canUse = XMInstallSDK.canUseWxOpen();
     if (canUse && wxContainer.value) {
       showWxOpenButton.value = true;
 
       // 渲染微信开放标签
-      H5OpenAppSDK.renderWxOpenApp(wxContainer.value, {
-        appId: props.wxAppId!,
-        extInfo: props.extInfo,
-        template: '<div>打开App</div>',
+      XMInstallSDK.renderWxOpenTag(wxContainer.value, {
+        template:
+          '<button style="padding: 10px 20px; background: #07c160; color: white; border: none; border-radius: 4px;">打开微信小程序</button>',
       });
     }
   } catch (error) {
@@ -90,10 +87,10 @@ const checkWxOpenCapability = async () => {
 
 onMounted(async () => {
   // 初始化SDK
-  initSdk();
+  await initSdk();
 
   // 如果是微信环境，检查是否可以使用微信开放标签
-  if (H5OpenAppSDK.getEnvironment().isWeChat) {
+  if (isWeChat() && isInitialized.value) {
     await checkWxOpenCapability();
   }
 });

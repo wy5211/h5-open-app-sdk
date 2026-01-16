@@ -23,10 +23,10 @@ npm install h5-open-app-sdk
 ### 基础使用
 
 ```javascript
-import H5OpenAppSDK from 'h5-open-app-sdk';
+import XMInstallSDK from 'h5-open-app-sdk';
 
 // 初始化SDK
-H5OpenAppSDK.init({
+XMInstallSDK.init({
   id: 'your-business-app-id',
   wxAppId: 'your-wechat-app-id', // 微信公众号AppId
   universalLink: 'https://your-app.universal-link.com', // iOS Universal Link
@@ -37,8 +37,8 @@ H5OpenAppSDK.init({
 
 // 在微信环境中渲染打开按钮
 async function renderOpenButton() {
-  if (await H5OpenAppSDK.canUseWxOpen()) {
-    H5OpenAppSDK.renderWxOpenApp(document.getElementById('wx-container'), {
+  if (await XMInstallSDK.canUseWxOpen()) {
+    XMInstallSDK.renderWxOpenApp(document.getElementById('wx-container'), {
       appId: 'your-wechat-app-id',
       extInfo: { path: '/detail', id: 1 },
       template: '<div>打开App</div>',
@@ -47,7 +47,7 @@ async function renderOpenButton() {
 }
 
 // 打开App
-H5OpenAppSDK.openApp();
+XMInstallSDK.openApp();
 ```
 
 ### 在 Vue 中使用
@@ -70,7 +70,7 @@ H5OpenAppSDK.openApp();
 
 <script>
 import { ref, onMounted } from 'vue';
-import H5OpenAppSDK from 'h5-open-app-sdk';
+import XMInstallSDK from 'h5-open-app-sdk';
 
 export default {
   setup() {
@@ -78,9 +78,9 @@ export default {
     const showWxButton = ref(false);
 
     onMounted(async () => {
-      if (await H5OpenAppSDK.canUseWxOpen()) {
+      if (await XMInstallSDK.canUseWxOpen()) {
         showWxButton.value = true;
-        H5OpenAppSDK.renderWxOpenApp(wxContainer.value, {
+        XMInstallSDK.renderWxOpenApp(wxContainer.value, {
           appId: 'your-wx-app-id',
           extInfo: { path: '/detail', id: 1 },
         });
@@ -88,7 +88,7 @@ export default {
     });
 
     const openApp = () => {
-      H5OpenAppSDK.openApp();
+      XMInstallSDK.openApp();
     };
 
     return {
@@ -105,15 +105,15 @@ export default {
 
 ```jsx
 import React, { useEffect, useRef } from 'react';
-import H5OpenAppSDK from 'h5-open-app-sdk';
+import XMInstallSDK from 'h5-open-app-sdk';
 
 const AppOpenButton = () => {
   const wxContainerRef = useRef(null);
 
   useEffect(() => {
     const init = async () => {
-      if (await H5OpenAppSDK.canUseWxOpen()) {
-        H5OpenAppSDK.renderWxOpenApp(wxContainerRef.current, {
+      if (await XMInstallSDK.canUseWxOpen()) {
+        XMInstallSDK.renderWxOpenApp(wxContainerRef.current, {
           appId: 'your-wx-app-id',
           extInfo: { path: '/detail', id: 1 },
         });
@@ -124,7 +124,7 @@ const AppOpenButton = () => {
   }, []);
 
   const openApp = () => {
-    H5OpenAppSDK.openApp();
+    XMInstallSDK.openApp();
   };
 
   return (

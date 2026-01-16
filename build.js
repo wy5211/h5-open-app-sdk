@@ -4,7 +4,7 @@ const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-console.log('Building H5OpenAppSDK...');
+console.log('Building XMInstallSDK...');
 
 try {
   // 检查是否安装了依赖

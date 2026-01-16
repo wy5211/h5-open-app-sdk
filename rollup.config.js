@@ -9,7 +9,7 @@ export default [
   {
     input: 'src/index.ts',
     output: {
-      name: 'H5OpenAppSDK',
+      name: 'XMInstallSDK',
       file: pkg.main,
       format: 'umd',
       sourcemap: true,

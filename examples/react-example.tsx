@@ -1,53 +1,53 @@
-import React, { useEffect, useRef } from 'react';
-import H5OpenAppSDK from '../src/index';
+import React, { useEffect, useRef, useState } from 'react';
+import XMInstallSDK, { isWeChat } from '../src/index';
 
 interface ReactExampleProps {
   appId: string;
-  wxAppId?: string;
-  scheme?: string;
-  universalLink?: string;
-  downloadUrl?: string;
-  extInfo?: Record<string, any>;
+  isDebug?: boolean;
   buttonText?: string;
 }
 
 const ReactExample: React.FC<ReactExampleProps> = ({
   appId,
-  wxAppId,
-  scheme,
-  universalLink,
-  downloadUrl,
-  extInfo = {},
+  isDebug = false,
   buttonText = '打开App',
 }) => {
   const wxContainerRef = useRef<HTMLDivElement>(null);
-  const [showWxOpenButton, setShowWxOpenButton] = React.useState(false);
+  const [showWxOpenButton, setShowWxOpenButton] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // 初始化SDK
   useEffect(() => {
-    H5OpenAppSDK.init({
-      id: appId,
-      wxAppId,
-      scheme,
-      universalLink,
-      downloadUrl,
-      extInfo,
-    });
-  }, [appId, wxAppId, scheme, universalLink, downloadUrl, extInfo]);
+    const initSdk = async () => {
+      try {
+        await XMInstallSDK.init({
+          id: appId,
+          isDebug,
+        });
+        setIsInitialized(true);
+        console.log('SDK初始化成功');
+      } catch (error) {
+        console.error('SDK初始化失败:', error);
+      }
+    };
+
+    initSdk();
+  }, [appId, isDebug]);
 
   // 检查是否可以使用微信开放标签
   useEffect(() => {
     const checkWxOpenCapability = async () => {
+      if (!isInitialized) return;
+
       try {
-        const canUse = await H5OpenAppSDK.canUseWxOpen();
+        const canUse = XMInstallSDK.canUseWxOpen();
         if (canUse && wxContainerRef.current) {
           setShowWxOpenButton(true);
 
           // 渲染微信开放标签
-          H5OpenAppSDK.renderWxOpenApp(wxContainerRef.current, {
-            appId: wxAppId!,
-            extInfo,
-            template: '<div>打开App</div>',
+          XMInstallSDK.renderWxOpenTag(wxContainerRef.current, {
+            template:
+              '<button style="padding: 10px 20px; background: #07c160; color: white; border: none; border-radius: 4px;">打开APP</button>',
           });
         }
       } catch (error) {
@@ -56,41 +56,54 @@ const ReactExample: React.FC<ReactExampleProps> = ({
     };
 
     // 如果是微信环境，检查是否可以使用微信开放标签
-    if (H5OpenAppSDK.getEnvironment().isWeChat) {
+    if (isWeChat() && isInitialized) {
       checkWxOpenCapability();
     }
-  }, [wxAppId, extInfo]);
+  }, [isInitialized]);
 
   // 处理打开App
   const handleOpenApp = () => {
-    if (H5OpenAppSDK.getEnvironment().isWeChat) {
-      // 在微信中，尝试使用微信开放标签
-      H5OpenAppSDK.openApp();
-    } else {
-      // 在非微信环境中，使用scheme或universal link
-      if (universalLink) {
-        H5OpenAppSDK.openByUniversalLink();
-      } else if (scheme) {
-        H5OpenAppSDK.openByScheme();
-      } else if (downloadUrl) {
-        H5OpenAppSDK.openDownload();
-      }
+    try {
+      XMInstallSDK.openApp();
+    } catch (error) {
+      console.error('打开App失败:', error);
     }
   };
+
+  if (!isInitialized) {
+    return <div>SDK初始化中...</div>;
+  }
 
   return (
     <div className="app-open-container">
       {/* 微信开放标签容器 */}
-      {showWxOpenButton && <div ref={wxContainerRef} />}
+      {showWxOpenButton && (
+        <div>
+          <div ref={wxContainerRef} />
+          <p>点击上方按钮打开微信小程序</p>
+        </div>
+      )}
 
       {/* 备用按钮 */}
       {!showWxOpenButton && (
-        <button
-          onClick={handleOpenApp}
-          className="open-app-btn"
-        >
-          {buttonText}
-        </button>
+        <div>
+          <button
+            onClick={handleOpenApp}
+            className="open-app-btn"
+            style={{
+              padding: '10px 20px',
+              backgroundColor: '#007aff',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              fontSize: '16px',
+              cursor: 'pointer',
+            }}
+          >
+            {buttonText}
+          </button>
+          <p>点击按钮打开App</p>
+        </div>
       )}
     </div>
   );

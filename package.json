@@ -1,6 +1,6 @@
 {
-  "name": "h5-open-app-sdk",
-  "version": "1.0.0",
+  "name": "xm-install-sdk",
+  "version": "0.0.1",
   "description": "A JavaScript SDK for opening mobile apps from H5 pages with optimal strategy in WeChat and browser environments",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
