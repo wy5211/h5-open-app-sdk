@@ -15,7 +15,7 @@
 ## 安装
 
 ```bash
-npm install h5-open-app-sdk
+npm install xm-install-sdk
 ```
 
 ## 使用方法
@@ -23,7 +23,7 @@ npm install h5-open-app-sdk
 ### 基础使用
 
 ```javascript
-import XMInstallSDK from 'h5-open-app-sdk';
+import XMInstallSDK from 'xm-install-sdk';
 
 // 初始化SDK
 XMInstallSDK.init({
@@ -70,7 +70,7 @@ XMInstallSDK.openApp();
 
 <script>
 import { ref, onMounted } from 'vue';
-import XMInstallSDK from 'h5-open-app-sdk';
+import XMInstallSDK from 'xm-install-sdk';
 
 export default {
   setup() {
@@ -105,7 +105,7 @@ export default {
 
 ```jsx
 import React, { useEffect, useRef } from 'react';
-import XMInstallSDK from 'h5-open-app-sdk';
+import XMInstallSDK from 'xm-install-sdk';
 
 const AppOpenButton = () => {
   const wxContainerRef = useRef(null);
