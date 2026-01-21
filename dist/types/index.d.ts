@@ -6,13 +6,14 @@ export interface SdkInitOptions {
     id: string;
     isDebug?: boolean;
     ext_info?: string;
+    loadWxSdk?: boolean;
 }
 /**
  * 渲染微信开放标签选项
  */
 export interface RenderWxOpenAppOptions {
-    /** 自定义模板 */
-    template?: string;
+    /** 自定义模板（HTML字符串或DOM元素） */
+    template: string | HTMLElement;
 }
 /**
  * 打开App策略接口
@@ -26,19 +27,20 @@ export interface OpenAppStrategy {
 export interface SdkInterface {
     /**
      * 初始化SDK
+     * @param options - SDK初始化参数
+     * @returns Promise<void>
      */
     init: (options: SdkInitOptions) => Promise<void>;
     /**
      * 打开App
+     * @throws 如果SDK未初始化会抛出错误
      */
     openApp: () => void;
     /**
-     * 检查微信策略是否就绪
+     * 渲染打开App的触发器
+     * @param container - 要渲染到的DOM容器
+     * @param options - 渲染选项，可选
      */
-    isWxReady: () => boolean;
-    /**
-     * 渲染微信开放标签
-     */
-    renderWxOpenTag: (container: HTMLElement, options: RenderWxOpenAppOptions) => void;
+    renderOpenAppTrigger: (container: HTMLElement, options?: RenderWxOpenAppOptions) => void;
 }
 //# sourceMappingURL=index.d.ts.map

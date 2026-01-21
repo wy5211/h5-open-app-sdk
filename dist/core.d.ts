@@ -8,7 +8,7 @@ declare class XMInstallSDK {
     /**
      * 初始化SDK
      */
-    init(options: SdkInitOptions): Promise<void>;
+    init(options: SdkInitOptions): Promise<XMInstallSDK>;
     /**
      * 检查是否已初始化
      */
@@ -18,13 +18,13 @@ declare class XMInstallSDK {
      * 从远程获取应用配置
      */
     private fetchRemoteConfig;
-    canUseWxOpen(): boolean;
     private executeWxStrategyPrepare;
     /**
-     * 渲染微信开放标签
-     * 注意：只负责渲染标签，不处理点击事件和兜底逻辑
+     * 渲染打开App的触发器
+     * @param container - DOM容器元素
+     * @param options - 渲染选项
      */
-    renderWxOpenTag(container: HTMLElement, options: RenderWxOpenAppOptions): void;
+    renderOpenAppTrigger(container: HTMLElement, options: RenderWxOpenAppOptions): void;
 }
 declare const sdkInstance: XMInstallSDK;
 export default sdkInstance;

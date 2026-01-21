@@ -1,4 +1,4 @@
-import { OpenAppStrategy } from '../types';
+import { OpenAppStrategy, RenderWxOpenAppOptions } from '../types';
 /**
  * 通用策略
  */
@@ -13,6 +13,7 @@ declare class CommonStrategy implements OpenAppStrategy {
     private getWebGLInfo;
     private getDownloadExtraInfo;
     execute(): Promise<void>;
+    renderOpenAppDom(container: HTMLElement, options: RenderWxOpenAppOptions): Promise<void>;
 }
 declare const instance: CommonStrategy;
 export default instance;
