@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>微信Scheme跳转测试</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 50px auto;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+      .container {
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      .test-btn {
+        background: #07c160;
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        font-size: 16px;
+        border-radius: 5px;
+        cursor: pointer;
+        margin: 10px 5px;
+        transition: background 0.3s;
+      }
+      .test-btn:hover {
+        background: #06ad56;
+      }
+      .result {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 5px;
+        display: none;
+      }
+      .success {
+        background: #d4edda;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+      }
+      .error {
+        background: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+      }
+      .info {
+        background: #d1ecf1;
+        border: 1px solid #bee5eb;
+        color: #0c5460;
+      }
+      .test-case {
+        margin: 20px 0;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+      }
+      h3 {
+        margin-top: 0;
+        color: #333;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>微信Scheme跳转测试工具</h1>
+      <p>本工具用于测试PC端微信的各种scheme跳转功能</p>
+
+      <div class="test-case">
+        <h3>测试案例1: 基础微信聊天</h3>
+        <button
+          class="test-btn"
+          onclick="testWeChatChat()"
+        >
+          跳转到微信聊天 (weixin://)
+        </button>
+        <div
+          id="result1"
+          class="result"
+        ></div>
+      </div>
+
+      <div class="test-case">
+        <h3>测试案例2: 扫码登录</h3>
+        <button
+          class="test-btn"
+          onclick="testScanQRCode()"
+        >
+          扫码登录测试
+        </button>
+        <div
+          id="result2"
+          class="result"
+        ></div>
+      </div>
+
+      <div class="test-case">
+        <h3>测试案例3: 自定义参数跳转</h3>
+        <button
+          class="test-btn"
+          onclick="testCustomScheme()"
+        >
+          自定义XM Scheme测试
+        </button>
+        <div
+          id="result3"
+          class="result"
+        ></div>
+      </div>
+
+      <div class="test-case">
+        <h3>测试案例4: 多种方式对比</h3>
+        <button
+          class="test-btn"
+          onclick="testMultipleMethods()"
+        >
+          多种跳转方式对比
+        </button>
+        <div
+          id="result4"
+          class="result"
+        ></div>
+      </div>
+
+      <div class="test-case">
+        <h3>浏览器信息</h3>
+        <div
+          id="browser-info"
+          class="info"
+        ></div>
+      </div>
+    </div>
+
+    <script>
+      // 显示浏览器信息
+      function showBrowserInfo() {
+        const info = `
+                <strong>浏览器信息:</strong><br>
+                User Agent: ${navigator.userAgent}<br>
+                平台: ${navigator.platform}<br>
+                Cookie启用: ${navigator.cookieEnabled}<br>
+                是否微信环境: ${
+                  /MicroMessenger/i.test(navigator.userAgent) ? '是' : '否'
+                }
+            `;
+        document.getElementById('browser-info').innerHTML = info;
+      }
+
+      // 显示结果
+      function showResult(elementId, message, isSuccess = true) {
+        const element = document.getElementById(elementId);
+        element.innerHTML = message;
+        element.className = `result ${isSuccess ? 'success' : 'error'}`;
+        element.style.display = 'block';
+      }
+
+      // 测试基础微信聊天跳转
+      function testWeChatChat() {
+        const scheme = 'weixin://';
+        const fallbackUrl = 'https://weixin.qq.com/';
+
+        showResult('result1', `正在尝试跳转到: ${scheme}`, true);
+
+        try {
+          // 方法1: 直接跳转
+          window.location.href = scheme;
+
+          // 方法2: 延迟使用window.open作为备选
+          setTimeout(() => {
+            try {
+              const newWindow = window.open(scheme, '_blank');
+              if (newWindow) {
+                setTimeout(() => {
+                  try {
+                    newWindow.close();
+                  } catch (e) {
+                    console.log('无法关闭新窗口');
+                  }
+                }, 100);
+              }
+            } catch (e) {
+              console.warn('window.open失败:', e);
+            }
+          }, 100);
+
+          // 3秒后如果没有跳转成功，则跳转到备用链接
+          setTimeout(() => {
+            showResult(
+              'result1',
+              `跳转未成功，前往备用页面: <a href="${fallbackUrl}" target="_blank">${fallbackUrl}</a>`,
+              false
+            );
+            window.location.href = fallbackUrl;
+          }, 3000);
+        } catch (error) {
+          showResult('result1', `跳转失败: ${error.message}`, false);
+        }
+      }
+
+      // 测试扫码登录
+      function testScanQRCode() {
+        // 微信扫码登录的常见scheme格式
+        const schemes = [
+          'weixin://dl/business/?t=xxx', // 示例扫码参数
+          'weixin://dl/scan', // 扫码功能
+          'weixin://scan', // 另一种扫码格式
+        ];
+
+        let currentIndex = 0;
+
+        function tryNextScheme() {
+          if (currentIndex >= schemes.length) {
+            showResult('result2', '所有扫码方案均已尝试，未成功跳转', false);
+            return;
+          }
+
+          const scheme = schemes[currentIndex];
+          showResult(
+            'result2',
+            `尝试第${currentIndex + 1}个方案: ${scheme}`,
+            true
+          );
+
+          try {
+            window.location.href = scheme;
+
+            // 2秒后尝试下一个方案
+            setTimeout(() => {
+              currentIndex++;
+              tryNextScheme();
+            }, 2000);
+          } catch (error) {
+            currentIndex++;
+            tryNextScheme();
+          }
+        }
+
+        tryNextScheme();
+      }
+
+      // 测试自定义XM Scheme
+      function testCustomScheme() {
+        // 你的原始scheme示例
+        const scheme =
+          'xm://dl/jump/?page=com.sharexm.xm.childapp.meeting.activity.OpenMeetingActivity&from=wdegrl85doeg&to=wdegrl85doeg&appId=wdegrl85doeg&shareUserId=xx&recordNumber=738535117&sign=xxx';
+        const fallbackUrl = 'https://www.example.com/download';
+
+        showResult('result3', `正在测试自定义scheme:<br>${scheme}`, true);
+
+        // 检测scheme支持
+        const testLink = document.createElement('a');
+        testLink.href = scheme;
+        testLink.style.display = 'none';
+        document.body.appendChild(testLink);
+
+        const isSupported = testLink.href === scheme;
+        document.body.removeChild(testLink);
+
+        if (!isSupported) {
+          showResult('result3', `浏览器不支持此scheme格式`, false);
+          return;
+        }
+
+        try {
+          // 多种方式尝试
+          window.location.href = scheme;
+
+          setTimeout(() => {
+            try {
+              window.open(scheme, '_blank');
+            } catch (e) {
+              console.warn('window.open失败');
+            }
+          }, 100);
+
+          setTimeout(() => {
+            showResult('result3', `跳转未成功，前往备用页面`, false);
+            window.location.href = fallbackUrl;
+          }, 2500);
+        } catch (error) {
+          showResult('result3', `跳转失败: ${error.message}`, false);
+        }
+      }
+
+      // 测试多种跳转方式
+      function testMultipleMethods() {
+        const scheme = 'weixin://';
+
+        showResult('result4', '开始测试多种跳转方式...', true);
+
+        // 方法1: 直接location.href
+        setTimeout(() => {
+          try {
+            showResult('result4', '方法1: window.location.href', true);
+            window.location.href = scheme;
+          } catch (e) {
+            console.log('方法1失败');
+          }
+        }, 500);
+
+        // 方法2: window.open
+        setTimeout(() => {
+          try {
+            showResult('result4', '方法2: window.open', true);
+            const win = window.open(scheme, '_blank');
+            if (win) {
+              setTimeout(() => {
+                try {
+                  win.close();
+                } catch (e) {
+                  console.log('无法关闭窗口');
+                }
+              }, 100);
+            }
+          } catch (e) {
+            console.log('方法2失败');
+          }
+        }, 1000);
+
+        // 方法3: 动态创建链接并点击
+        setTimeout(() => {
+          try {
+            showResult('result4', '方法3: 动态链接点击', true);
+            const link = document.createElement('a');
+            link.href = scheme;
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          } catch (e) {
+            console.log('方法3失败');
+          }
+        }, 1500);
+      }
+
+      // 页面加载完成后显示浏览器信息
+      window.onload = function () {
+        showBrowserInfo();
+      };
+    </script>
+  </body>
+</html>
