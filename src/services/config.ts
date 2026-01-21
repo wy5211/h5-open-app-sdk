@@ -47,7 +47,8 @@ export async function getAppBaseConfig(data: {
 
 export async function getDownloadConfig(data: {
   app_id: string;
-  ext_info: Record<string, any>;
+  ext_info?: string;
+  [key: string]: any;
 }): Promise<{
   scheme: string;
   url: string;

@@ -183,10 +183,9 @@ class CommonStrategy implements OpenAppStrategy {
 
     const downloadConfig = await getDownloadConfig({
       app_id: appId,
-      ext_info: {
-        project_unique_id: appId,
-        ...extraInfo,
-      },
+      ext_info: context.getInitData()?.ext_info,
+      project_unique_id: appId,
+      ...extraInfo,
     });
 
     const { scheme, url } = downloadConfig;
