@@ -2,6 +2,7 @@ import { AppBaseConfig, OpenTagConfig } from '@/services/config';
 import { OpenAppStrategy, RenderWxOpenAppOptions } from '@/types';
 import context from '@/utils/context';
 import { loadJSSDK } from '@/utils/loadJs';
+import commonStrategy from './commonStrategy';
 
 /**
  * 微信开放标签策略
@@ -129,6 +130,8 @@ class WxOpenStrategy implements OpenAppStrategy {
     });
     el.addEventListener('error', function (e) {
       console.log('fail', e);
+      // 走 download 逻辑
+      commonStrategy.execute();
     });
 
     // 添加到容器
