@@ -1,5 +1,5 @@
 import { isAndroid, isIOS } from '@/environment';
-import { OpenAppStrategy } from '../types';
+import { OpenAppStrategy, RenderWxOpenAppOptions } from '../types';
 import { getDownloadConfig } from '@/services/config';
 import context from '@/utils/context';
 
@@ -224,6 +224,36 @@ class CommonStrategy implements OpenAppStrategy {
     if (url) {
       window.location.href = url;
     }
+  }
+
+  async renderOpenAppDom(
+    container: HTMLElement,
+    options: RenderWxOpenAppOptions
+  ) {
+    if (!container || typeof container.addEventListener !== 'function') {
+      console.error('Invalid container provided.');
+      return;
+    }
+
+    // 清空容器
+    container.innerHTML = '';
+
+    // 根据模板类型进行插入
+    if (typeof options.template === 'string') {
+      // 字符串模板：使用 innerHTML 解析HTML
+      container.innerHTML = options.template;
+    } else if (options.template instanceof HTMLElement) {
+      // DOM元素：直接插入
+      container.appendChild(options.template);
+    } else {
+      console.error('XMInstallSDK renderOpenAppDom: 无效的模板类型');
+      return;
+    }
+
+    // 添加点击事件（在DOM插入之后）
+    container.addEventListener('click', () => {
+      this.execute();
+    });
   }
 }
 

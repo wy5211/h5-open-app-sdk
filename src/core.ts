@@ -16,10 +16,7 @@ class XMInstallSDK {
   /**
    * 初始化SDK
    */
-  public async init(options: SdkInitOptions): Promise<void> {
-    // await loadJSSDK('http://res.wx.qq.com/open/js/jweixin-1.6.0.js');
-
-    // return;
+  public async init(options: SdkInitOptions): Promise<XMInstallSDK> {
     if (!options?.id) {
       throw new Error('XMInstallSDK 未配置应用ID');
     }
@@ -31,13 +28,16 @@ class XMInstallSDK {
     context.setInitData(options);
     try {
       await this.fetchRemoteConfig();
-      // 尝试执行微信准备工作
-      await this.executeWxStrategyPrepare();
+      if (options.loadWxSdk) {
+        // 尝试执行微信准备工作
+        await this.executeWxStrategyPrepare();
+      }
       this.initialized = true;
     } catch (error) {
       console.error('XMInstallSDK 初始化失败:', error);
       throw error;
     }
+    return this;
   }
 
   /**
@@ -81,10 +81,6 @@ class XMInstallSDK {
     }
   }
 
-  public canUseWxOpen(): boolean {
-    return WxOpenStrategy.canUse();
-  }
-
   // 执行微信策略
   private async executeWxStrategyPrepare(): Promise<void> {
     if (isWeChatEnv() && context.isSupportOpenTag()) {
@@ -99,15 +95,46 @@ class XMInstallSDK {
   }
 
   /**
-   * 渲染微信开放标签
-   * 注意：只负责渲染标签，不处理点击事件和兜底逻辑
+   * 渲染打开App的触发器
+   * @param container - DOM容器元素
+   * @param options - 渲染选项
    */
-  public renderWxOpenTag(
+  public renderOpenAppTrigger(
     container: HTMLElement,
     options: RenderWxOpenAppOptions
   ): void {
     this.checkInitialized();
-    WxOpenStrategy.renderOpenTag(container, options);
+
+    // 容器有效性检查
+    if (!container) {
+      throw new Error('容器元素不能为空');
+    }
+
+    if (!(container instanceof HTMLElement)) {
+      throw new Error('容器必须是有效的 HTMLElement');
+    }
+
+    // SSR环境检查
+    if (typeof document === 'undefined') {
+      console.warn('renderOpenAppTrigger 只能在浏览器环境中使用');
+      return;
+    }
+
+    // 检查容器是否已挂载到DOM树
+    // if (!document.body.contains(container)) {
+    //   console.warn('容器元素尚未挂载到DOM树，可能导致渲染失败');
+    // }
+
+    try {
+      if (WxOpenStrategy.canUse()) {
+        WxOpenStrategy.renderOpenTag(container, options);
+      } else {
+        commonStrategy.renderOpenAppDom(container, options);
+      }
+    } catch (error) {
+      console.error('渲染打开App触发器失败:', error);
+      throw error;
+    }
   }
 }
 

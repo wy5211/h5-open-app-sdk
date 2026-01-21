@@ -118,10 +118,21 @@ class WxOpenStrategy implements OpenAppStrategy {
       el.setAttribute('extinfo', context.getInitData()?.ext_info || '');
     }
 
+    // 处理模板，支持字符串和DOM元素
+    let templateString = '<div>打开APP</div>';
+    if (options.template) {
+      if (typeof options.template === 'string') {
+        templateString = options.template;
+      } else if (options.template instanceof HTMLElement) {
+        // 将DOM元素转换为字符串
+        templateString = options.template.outerHTML;
+      }
+    }
+
     // 设置模板内容
     el.innerHTML = `
           <script type="text/wxtag-template">
-            ${options.template || '<div>打开APP</div>'}
+            ${templateString}
           </script>
         `;
 
