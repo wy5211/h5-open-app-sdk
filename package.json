@@ -1,6 +1,6 @@
 {
   "name": "xm-install-sdk",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "description": "A JavaScript SDK for opening mobile apps from H5 pages with optimal strategy in WeChat and browser environments",
   "keywords": [
     "h5",
@@ -17,6 +17,12 @@
   "module": "dist/index.esm.js",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "examples",
+    "README.md",
+    "LICENSE"
+  ],
   "directories": {
     "example": "examples"
   },
